@@ -19,7 +19,7 @@ from deap import base, creator, tools
 from deap.tools import HallOfFame
 
 from expWorkbench import ema_logging, debug, EMAError, info
-from ema_optimization_util import compare, mut_polynomial_bounded,\
+from .ema_optimization_util import compare, mut_polynomial_bounded,\
                                   mut_uniform_int,\
                                   select_tournament_dominance_crowding
 

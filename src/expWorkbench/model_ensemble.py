@@ -7,14 +7,14 @@ Created on 23 dec. 2010
 '''
 from __future__ import division
 
-import types
+
 import copy
 import functools
 import os
 
 from collections import defaultdict
 
-from ema_parallel import CalculatorPool
+from .ema_parallel import CalculatorPool
 
 from expWorkbench.ema_logging import info, warning, exception, debug
 from expWorkbench.ema_exceptions import CaseError, EMAError
@@ -25,9 +25,9 @@ from expWorkbench.ema_optimization_util import evaluate_population_outcome,\
                                                generate_individual_robust,\
                                                evaluate_population_robust                                               
 
-from samplers import FullFactorialSampler, LHSSampler
-from uncertainties import ParameterUncertainty, CategoricalUncertainty
-from callbacks import DefaultCallback
+from .samplers import FullFactorialSampler, LHSSampler
+from .uncertainties import ParameterUncertainty, CategoricalUncertainty
+from .callbacks import DefaultCallback
 
 __all__ = ['ModelEnsemble', 'MINIMIZE', 'MAXIMIZE', 'UNION', 'INTERSECTION']
 
@@ -235,13 +235,13 @@ class ModelEnsemble(object):
             self._policies.append({"name": "None"})
         
         # identify the uncertainties and sample over them
-        if type(cases) ==  types.IntType:
+        if type(cases) ==  int:
             sampled_unc, unc_dict = self._generate_samples(cases, 
                                                            which_uncertainties)
             nr_of_exp =self.sampler.deterimine_nr_of_designs(sampled_unc)\
                       *len(self._policies)*len(self._msis)
             experiments = self._generate_experiments(sampled_unc)
-        elif type(cases) == types.ListType:
+        elif type(cases) == list:
             unc_dict = self.determine_uncertainties()[1]
             unc_names = cases[0].keys()
             sampled_unc = {name:[] for name in unc_names}
@@ -297,7 +297,7 @@ class ModelEnsemble(object):
                 
                 # check whether we already initialized the model for this 
                 # policy
-                if not msi_initialization_dict.has_key((policy['name'], msi)):
+                if (policy['name'], msi) not in msi_initialization_dict:
                     try:
                         debug("invoking model init")
                         msis[msi].model_init(copy.deepcopy(policy),\
@@ -504,7 +504,7 @@ class ModelEnsemble(object):
         for msi in self._msis:
             elements = getattr(msi, attribute)
             for element in elements:
-                if element_dict.has_key(element.name):
+                if element.name in element_dict:
                     if element==element_dict[element.name]:
                         overview_dict[element.name].append(msi)
                     else:
@@ -516,7 +516,7 @@ class ModelEnsemble(object):
                     overview_dict[element.name] = [msi]
         
         temp_overview = defaultdict(list)
-        for key, value in overview_dict.iteritems():
+        for key, value in overview_dict.items():
             temp_overview[tuple([msi.name for msi in value])].append(element_dict[key])  
         overview_dict = temp_overview
         
@@ -693,9 +693,9 @@ def experiment_generator(sampled_unc, model_structures, policies, sampler):
         debug("generating designs for model %s" % (msi.name))
         
         samples = [sampled_unc[unc.name] for unc in msi.uncertainties if\
-                   sampled_unc.has_key(unc.name)]
+                   unc.name in sampled_unc]
         uncertainties = [unc.name for unc in msi.uncertainties if\
-                         sampled_unc.has_key(unc.name)]
+                         unc.name in sampled_unc]
         for policy in policies:
             debug("generating designs for policy %s" % (policy['name']))
             designs = sampler.generate_designs(samples)

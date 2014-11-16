@@ -8,22 +8,24 @@ This module provides various convenience functions and classes.
 '''
 from __future__ import division
 
-import cPickle
+import pickle
 import os
 import bz2
 import math
-import StringIO
+import io
+import tarfile
 
 import numpy as np
 import pandas as pd
+import numpy.lib.recfunctions as recfunctions
+
 from pandas.io.parsers import read_csv
 from matplotlib.mlab import rec2csv, csv2rec
 
 from deap import creator, base
 
-from ema_logging import info, debug, warning
-from expWorkbench import EMAError
-import tarfile
+from .ema_logging import info, debug, warning
+
 
 __all__ = ['load_results',
            'save_results',
@@ -45,13 +47,16 @@ def load_results(file_name):
     '''
     
     outcomes = {}
-    with tarfile.open(file_name, 'r') as z:
+    with tarfile.open(file_name, 'r',) as z:
         # load experiments
         experiments = z.extractfile('experiments.csv')
-        experiments = csv2rec(experiments)
-
+        df = pd.io.parsers.read_table(experiments, sep=',')
+        experiments = df.to_records()
+        experiments = recfunctions.drop_fields(experiments, ['index'])
+        
         # load experiment metadata
         metadata = z.extractfile('experiments metadata.csv').readlines()
+        metadata = [entry.decode('UTF-8') for entry in metadata]
         metadata = [entry.strip() for entry in metadata]
         metadata = [tuple(entry.split(",")) for entry in metadata]
         metadata = np.dtype(metadata)
@@ -66,12 +71,13 @@ def load_results(file_name):
         
         # load outcome metadata
         metadata = z.extractfile('outcomes metadata.csv').readlines()
+        metadata = [entry.decode('UTF-8') for entry in metadata]
         metadata = [entry.strip() for entry in metadata]
         metadata = [tuple(entry.split(",")) for entry in metadata]
         metadata = {entry[0]: entry[1:] for entry in metadata}
 
         # load outcomes
-        for outcome, shape in metadata.iteritems():
+        for outcome, shape in metadata.items():
             shape = list(shape)
             shape[0] = shape[0][1:]
             shape[-1] = shape[-1][0:-1]
@@ -120,7 +126,7 @@ def save_results(results, file_name):
         tarinfo = tarfile.TarInfo(filename)
         tarinfo.size = len(string_to_add)
         
-        z.addfile(tarinfo, StringIO.StringIO(string_to_add))  
+        z.addfile(tarinfo, io.StringIO(string_to_add))  
     
     def save_numpy_array(fh, data):
         data = pd.DataFrame(data)
@@ -129,7 +135,7 @@ def save_results(results, file_name):
     experiments, outcomes = results
     with tarfile.open(file_name, 'w:gz') as z:
         # write the experiments to the zipfile
-        experiments_file = StringIO.StringIO()
+        experiments_file = io.StringIO()
         rec2csv(experiments, experiments_file, withheader=True)
         add_file(z, experiments_file.getvalue(), 'experiments.csv')
         
@@ -149,7 +155,7 @@ def save_results(results, file_name):
         
         # outcomes
         for key, value in outcomes.iteritems():
-            fh = StringIO.StringIO()
+            fh = io.StringIO()
             
             nr_dim = len(value.shape)
             if nr_dim==3:
@@ -159,7 +165,7 @@ def save_results(results, file_name):
                     fh = fh.getvalue()
                     fn = '{}_{}.csv'.format(key, i)
                     add_file(z, fh, fn)
-                    fh = StringIO.StringIO()
+                    fh = io.StringIO()
             else:
                 save_numpy_array(fh, value)
                 fh = fh.getvalue()
@@ -239,7 +245,7 @@ def pickled_load_results(file_name, zipped=True):
         else:
             file_handle = open(file_name, 'rb')
         
-        results = cPickle.load(file_handle)
+        results = pickle.load(file_handle)
     except IOError:
         warning(file_name + " not found")
         raise
@@ -267,9 +273,8 @@ def pickled_save_results(results, file_name, zipped=True):
             file_name = bz2.BZ2File(file_name, 'wb')
         else:
             file_name = open(file_name, 'wb')
-
         
-        cPickle.dump(results, file_name, protocol=2)
+        pickle.dump(results, file_name, protocol=2)
     except IOError:
         warning(os.path.abspath(file_name) + " not found")
         raise
@@ -308,7 +313,7 @@ def results_to_tab(results, file_name):
 
 
 def transform_old_cPickle_to_new_cPickle(file_name):
-    data = cPickle.load(open(file_name, 'r'))
+    data = pickle.load(open(file_name, 'r'))
     
     uncertainties = []
     dtypes= []
@@ -528,7 +533,7 @@ def load_optimization_results(file_name, weights, zipped=True):
         else:
             file_name = open(file_name, 'rb')
         
-        results = cPickle.load(file_name)
+        results = pickle.load(file_name)
         
         if results[0].weights != weights:
             raise EMAError("weights are %s, should be %s" % (weights, results[0].weights))

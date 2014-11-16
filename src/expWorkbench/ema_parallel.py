@@ -22,11 +22,11 @@ import sys
 import traceback
 import threading
 import logging
-import cStringIO
+import io
 import copy
 import os
 import time
-import Queue
+import queue
 import multiprocessing
 import random
 import string
@@ -35,10 +35,10 @@ from multiprocessing import Process, cpu_count, current_process,\
                             TimeoutError
 from multiprocessing.util import Finalize
 
-from pool import RUN, Pool, TERMINATE
-from ema_logging import debug, exception, info, warning, NullHandler, LOG_FORMAT
-import ema_logging                  
-                                     
+from . import ema_logging
+
+from .pool import RUN, Pool, TERMINATE
+from .ema_logging import debug, exception, info, warning, NullHandler, LOG_FORMAT
 from expWorkbench.ema_exceptions import CaseError, EMAError, EMAParallelError
 
 __all__ = ['CalculatorPool']
@@ -551,7 +551,7 @@ class SubProcessLogHandler(logging.Handler):
         self.queue.put(record)
 
     def formatException(self, ei):
-        sio = cStringIO.StringIO()
+        sio = io.StringIO()
         traceback.print_exception(ei[0], ei[1], ei[2], None, sio)
         s = sio.getvalue()
         sio.close()

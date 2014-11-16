@@ -5,13 +5,12 @@ Created on Mar 22, 2014
 '''
 import os
 import zipfile
-import StringIO
-
-import numpy.lib.recfunctions as rf
+import io
+import numpy as np
 
 from matplotlib.mlab import csv2rec
-import numpy as np
-from expWorkbench import TIME, ema_logging
+
+from expWorkbench import TIME
 from expWorkbench.util import load_results
 
 def load_flu_data():
@@ -31,6 +30,7 @@ def load_scarcity_data():
     return experiments, outcomes
     
     return experiments, outcomes
+
 
 def load_eng_trans_data():
 
@@ -99,20 +99,20 @@ def load_eng_trans_data():
     outcomes = {}
 
     with zipfile.ZipFile(fn) as z:
-        experiments = StringIO.StringIO(z.read('experiments.csv'))
+        experiments = io.StringIO(z.read('experiments.csv').decode('UTF-8'))
         experiments = csv2rec(experiments)
         dt = np.dtype(dt_descr)
         names = [entry[0] for entry in dt_descr]
         experiments.dtype.names = names
         experiments = experiments.astype(dt)
        
-        data = StringIO.StringIO(z.read('total capacity installed.csv'))
+        data = io.StringIO(z.read('total capacity installed.csv').decode('UTF-8'))
         outcomes['total capacity installed'] = np.loadtxt(data, delimiter=',')
          
-        data = StringIO.StringIO(z.read('TIME.csv'))
+        data = io.StringIO(z.read('TIME.csv').decode('UTF-8'))
         outcomes[TIME] = np.loadtxt(data, delimiter=',')
       
-        data = StringIO.StringIO(z.read('total fraction new technologies.csv'))
+        data = io.StringIO(z.read('total fraction new technologies.csv').decode('UTF-8'))
         outcomes['total fraction new technologies'] = np.loadtxt(data, 
                                                                  delimiter=',')
     

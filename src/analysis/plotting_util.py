@@ -5,7 +5,7 @@
 
 '''
 from __future__ import division
-from types import StringType, DictType, ListType
+
 import copy
 
 import numpy as np
@@ -128,7 +128,7 @@ def plot_histogram(ax, values, log):
     
     
     '''
-    if type(values)==ListType:
+    if type(values)==list:
         color = COLOR_LIST[0:len(values)]
     else:
         color='b'
@@ -276,9 +276,7 @@ def simple_kde(outcomes, outcomes_to_show, colormap, log, minima, maxima):
     :param minima:
     :param maxima:
     
-    
     '''
-
 
     figure, grid = make_grid(outcomes_to_show)
     axes_dict = {}
@@ -431,7 +429,7 @@ def determine_time_dimension(outcomes):
     
     '''
 
-    time = None
+    time = np.array([])
     try:
         time = outcomes['TIME']
         time = time[0, :]
@@ -442,7 +440,7 @@ def determine_time_dimension(outcomes):
             if len(value.shape)==2:
                 time =  np.arange(0, value.shape[1])
                 break
-    if time==None:
+    if not time.size:
         info("no time dimension found in results")
     return time, outcomes    
 
@@ -545,11 +543,11 @@ def make_continuous_grouping_specifiers(array, nr_of_groups=5):
     return a
 
 def prepare_pairs_data(results, 
-                        outcomes_to_show=None,
-                        group_by=None,
-                        grouping_specifiers=None,
-                        point_in_time=-1,
-                        filter_scalar=True):
+                       outcomes_to_show=None,
+                       group_by=None,
+                       grouping_specifiers=None,
+                       point_in_time=-1,
+                       filter_scalar=True):
     '''
     
     
@@ -561,7 +559,7 @@ def prepare_pairs_data(results,
     
     
     '''
-    if type(outcomes_to_show) == StringType:
+    if type(outcomes_to_show)==str:
         raise EMAError("for pair wise plotting, more than one outcome needs to be provided")
     
     outcomes, outcomes_to_show, time, grouping_labels = prepare_data(results, 
@@ -616,18 +614,12 @@ def prepare_data(results,
 
     # remove outcomes that are not to be shown
     if outcomes_to_show:
-        if type(outcomes_to_show) == StringType:
+        if type(outcomes_to_show)==str:
             outcomes_to_show  = [outcomes_to_show]
             
         for entry in outcomes_to_show:
             temp_outcomes[entry] = copy.deepcopy(outcomes[entry])
         
-# #         [outcomes.pop(entry) for entry in\
-# #          set(outcomes.keys()) - set(outcomes_to_show)]
-# 
-#     experiments = copy.deepcopy(experiments)
-#     outcomes = copy.deepcopy(outcomes)
-    
     time, outcomes = determine_time_dimension(outcomes)
 
     # filter the outcomes to exclude scalar values
@@ -635,7 +627,9 @@ def prepare_data(results,
         outcomes = filter_scalar_outcomes(outcomes)
     if not outcomes_to_show:
         outcomes_to_show = outcomes.keys()
-        
+    
+    outcomes_to_show = list(outcomes_to_show)
+    
     # group the data if desired
     if group_by:
         if not grouping_specifiers:
@@ -651,11 +645,11 @@ def prepare_data(results,
                                                         grouping_specifiers)
             grouping_labels=sorted(grouping_specifiers)
         else:
-            if type(grouping_specifiers) == StringType:
+            if type(grouping_specifiers)==str:
                 grouping_specifiers = [grouping_specifiers]
                 grouping_labels=grouping_specifiers
-            elif type(grouping_specifiers) == DictType:
-                grouping_labels=sorted(grouping_specifiers.keys())
+            elif type(grouping_specifiers)==dict:
+                grouping_labels=sorted(list(grouping_specifiers.keys()))
             else:
                 grouping_labels=grouping_specifiers
                 
@@ -683,7 +677,7 @@ def do_titles(ax, titles, outcome):
     
     '''
     
-    if type(titles)==DictType:
+    if type(titles)==dict:
         if not titles:
             ax.set_title(outcome)
         else:
@@ -704,7 +698,7 @@ def do_ylabels(ax, ylabels, outcome):
     
     '''
     
-    if type(ylabels)==DictType:
+    if type(ylabels)==dict:
         if not ylabels:
             ax.set_ylabel(outcome)
         else:

@@ -11,7 +11,7 @@ directly.
 
 '''
 from __future__ import division
-import types
+
 import decimal
 import math
 import numpy as np
@@ -21,9 +21,13 @@ from expWorkbench import debug, warning, ModelStructureInterface,\
                          ParameterUncertainty, CategoricalUncertainty,\
                          EMAError
 
-from vensimDLLwrapper import command, get_val
-from vensimDLLwrapper import VensimError, VensimWarning
-import vensimDLLwrapper 
+from . import vensimDLLwrapper 
+from .vensimDLLwrapper import command, get_val
+from .vensimDLLwrapper import VensimError, VensimWarning
+
+
+import ctypes
+a = ctypes.windll
 
 __all__ = ['be_quiet',
            'load_model',
@@ -95,7 +99,7 @@ def set_value(variable, value):
                   If it is a list, it is assumed the variable is a lookup.
     '''
     
-    if type(value) == types.ListType:
+    if type(value) == list:
         command(r"SIMULATE>SETVAL|"+variable+"("+ str(value)[1:-1] + ")")
     else:
         try:
@@ -303,7 +307,7 @@ class VensimModelStructureInterface(ModelStructureInterface):
                               output.name 
                               )
             debug("successfully retrieved data for %s" %output.name)
-            if not result == []:
+            if result.size:
                 if result.shape[0] != self.run_length:
                     got = result.shape[0]
                     data = np.empty((self.run_length))
@@ -319,7 +323,7 @@ class VensimModelStructureInterface(ModelStructureInterface):
             try:
                 results[output.name] = result
             except ValueError as e:
-                print "what"
+                print("what")
                 raise e
         self.output = results   
         if error:

@@ -12,7 +12,7 @@
 #    made compatible with the 2.7 or later version of pool.py
 
 import threading
-import Queue
+import queue
 import itertools
 import collections
 import time
@@ -67,7 +67,7 @@ def worker(inqueue, outqueue, initializer=None, initargs=()):
         job, i, func, args, kwds = task
         try:
             result = (True, func(*args, **kwds))
-        except Exception, e:
+        except Exception as e:
             result = (False, e)
         put((job, i, result))
 

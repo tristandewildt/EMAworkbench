@@ -15,7 +15,7 @@ import itertools
 import scipy.stats as stats
 import numpy as np 
 
-from uncertainties import CategoricalUncertainty
+from .uncertainties import CategoricalUncertainty
 
 __all__ = ['LHSSampler',
            'MonteCarloSampler',
@@ -94,7 +94,7 @@ class Sampler(object):
                 combining the uncertainties
         
         '''
-        designs = itertools.izip(*sampled_uncertainties) 
+        designs = zip(*sampled_uncertainties) 
         return designs
 
     def deterimine_nr_of_designs(self, sampled_uncertainties):
@@ -107,7 +107,7 @@ class Sampler(object):
         
         '''
         
-        return len(sampled_uncertainties.values()[0])
+        return len(list(sampled_uncertainties.values())[0])
 
 class LHSSampler(Sampler):
     """

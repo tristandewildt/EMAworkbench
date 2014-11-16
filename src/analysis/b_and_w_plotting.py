@@ -6,7 +6,7 @@ Created on 18 sep. 2012
 import numpy as np
 from matplotlib.colors import ColorConverter
 import matplotlib as mpl
-from types import ListType
+
 from matplotlib.collections import PolyCollection, PathCollection
 from expWorkbench.ema_exceptions import EMAError
 
@@ -85,9 +85,7 @@ def set_ax_collections_to_bw(ax, style):
             raise EMAError("converter for {} not implemented").format(collection.__class__)
  
 def _set_ax_polycollection_to_bw(collection, ax, style):
-
     if style==GREYSCALE:
-
         color_converter = ColorConverter()
         for polycollection in ax.collections:
             rgb_orig = polycollection._facecolors_original
@@ -115,6 +113,10 @@ def _set_ax_pathcollection_to_bw(collection, ax, style):
             colors[value] = key    
 
         rgb_orig = collection._facecolors_original
+        
+        if type(rgb_orig)==str:
+            rgb_orig = [rgb_orig]
+        
         rgb_orig = [color_converter.to_rgb(row) for row in rgb_orig]
         color = [colors.get(entry) for entry in rgb_orig]
         new_color = [color_converter.to_rgba(COLORMAP[entry]['fill']) for entry in color]
@@ -142,7 +144,7 @@ def set_legend_to_bw(leg, style):
         colors[value] = key
     
     if leg:
-        if type(leg) == ListType:
+        if type(leg) == list:
             leg = leg[0]
     
         for element in leg.legendHandles:

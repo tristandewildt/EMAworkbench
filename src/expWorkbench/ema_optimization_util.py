@@ -9,7 +9,7 @@ import numpy as np
 import numpy.lib.recfunctions as recfunctions
 
 import copy
-import ema_logging
+from . import ema_logging
 from expWorkbench.ema_exceptions import EMAError
 from expWorkbench import debug
 from expWorkbench.callbacks import DefaultCallback

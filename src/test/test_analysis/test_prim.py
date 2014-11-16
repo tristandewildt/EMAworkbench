@@ -369,7 +369,6 @@ class PrimTestCase(unittest.TestCase):
         x['b'] = [0,1,2,3,4,5,6,7,8,9]
         x['c'] = ['a','b','a','b',np.NAN,'a','b','a','b','a', ]
         
-        
         x = np.ma.array(x)
         x['a'] = np.ma.masked_invalid(x['a'])
         x['b'] = np.ma.masked_invalid(x['b'])
@@ -639,12 +638,12 @@ class PrimTestCase(unittest.TestCase):
         x = x
         peels = prim_obj._categorical_peel(box, u, x)
         
-        self.assertEquals(len(peels), 2)
+        self.assertEqual(len(peels), 2)
         
         for peel in peels:
             pl  = peel[1][u]
-            self.assertEquals(len(pl[0]), 1)
-            self.assertEquals(len(pl[1]), 1)
+            self.assertEqual(len(pl[0]), 1)
+            self.assertEqual(len(pl[1]), 1)
         
 
     def test_categorical_paste(self):
@@ -670,12 +669,12 @@ class PrimTestCase(unittest.TestCase):
             u = 'b'
             pastes = prim_obj._categorical_paste(box, u)
             
-            self.assertEquals(len(pastes), 1)
+            self.assertEqual(len(pastes), 1)
             
             for paste in pastes:
                 indices, box_lims = paste
                 
-                self.assertEquals(indices.shape[0], 10)
+                self.assertEqual(indices.shape[0], 10)
                 self.assertEqual(box_lims[u][0], set(['a','b']))
 
 if __name__ == '__main__':

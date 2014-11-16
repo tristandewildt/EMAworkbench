@@ -14,7 +14,7 @@ from threading import Lock
 from expWorkbench import ema_logging
 
 from expWorkbench.ema_logging import info, debug
-from uncertainties import CategoricalUncertainty,\
+from .uncertainties import CategoricalUncertainty,\
                                        ParameterUncertainty,\
                                        INTEGER
 
@@ -163,7 +163,7 @@ class DefaultCallback(AbstractCallback):
             try:
                 debug("storing {}".format(outcome))
             except ValueError:
-                print "what"
+                print("what")
             
             try:
                 outcome_res = result[outcome]
