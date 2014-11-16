@@ -1,6 +1,6 @@
-import prim
-import b_and_w_plotting
-import plotting
-import plotting_util
-import pairs_plotting
-import feature_scoring 
+from . import prim
+from . import b_and_w_plotting
+from . import plotting
+from . import plotting_util
+from . import pairs_plotting
+from . import feature_scoring 

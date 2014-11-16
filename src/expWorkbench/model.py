@@ -8,8 +8,8 @@ from __future__ import division
 import abc
 import os
 
-from ema_logging import debug
-from ema_exceptions import EMAError
+from .ema_logging import debug
+from .ema_exceptions import EMAError
 
 __all__ = ['ModelStructureInterface']
 

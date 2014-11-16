@@ -5,103 +5,32 @@ Created on Mar 22, 2014
 '''
 import os
 import zipfile
-import StringIO
-
-import numpy.lib.recfunctions as rf
+import io
+import numpy as np
 
 from matplotlib.mlab import csv2rec
-import numpy as np
-from expWorkbench import TIME, ema_logging
+
+from expWorkbench import TIME
+from expWorkbench.util import load_results
 
 def load_flu_data():
     path = os.path.dirname(__file__)
-    fn = './data/flu.zip'
+    fn = './data/1000 case flu no policy.tar.gz'
     fn = os.path.join(path, fn)
-    outcomes = {}
 
-    ooi_map = {'deceased population region 1': 'deceased population region 1.csv',
-               TIME: "TIME.csv",
-               'infected fraction R1':'infected fraction R1.csv'}
-
-    with zipfile.ZipFile(fn) as z:
-        experiments = StringIO.StringIO(z.read('experiments.csv'))
-        experiments = csv2rec(experiments)
-        dt_descr = experiments.dtype.descr
-        dt_descr[-1] = (dt_descr[-1][0], 'object') #transform policy dtype to object
-        dt_descr[-2] = (dt_descr[-2][0], 'object') #transform model dtype to object
-        dt = np.dtype(dt_descr)
-        experiments = experiments.astype(dt)
-
-        for key, value in ooi_map.iteritems():
-            data = StringIO.StringIO(z.read(value))
-            outcomes[key] = np.loadtxt(data, delimiter=',')    
-    
+    experiments, outcomes = load_results(fn)
     return experiments, outcomes
 
 def load_scarcity_data():
-    dt_descr = [('absolute recycling loss fraction', '<f8'),
-                ('average construction time extraction capacity', '<f8'),
-                ('average lifetime extraction capacity', '<f8'),
-                ('average lifetime recycling capacity', '<f8'),
-                ('exogenously planned extraction capacity', '<f8'),
-                ('fraction of maximum extraction capacity used', '<f8'),
-                ('initial annual supply', '<f8'),
-                ('initial average recycling cost', '<f8'),
-                ('initial extraction capacity under construction', '<f8'),
-                ('initial in goods', '<f8'),
-                ('initial recycling capacity under construction', '<f8'),
-                ('initial recycling infrastructure', '<f8'),
-                ('lookup approximated learning scale', '<f8'),
-                ('lookup approximated learning speed', '<f8'),
-                ('lookup approximated learning start', '<f8'),
-                ('lookup price substitute begin', '<f8'),
-                ('lookup price substitute end', '<f8'),
-                ('lookup price substitute speed', '<f8'),
-                ('lookup returns to scale scale', '<f8'),
-                ('lookup returns to scale speed', '<f8'),
-                ('lookup shortage normalize', '<i4'),
-                ('lookup shortage speed', '<f8'),
-                ('normal profit margin', '<f8'),
-                ('order extraction capacity delay', '|O4'),
-                ('order in goods delay', '|O4'),
-                ('order recycling capacity delay', '|O4'),
-                ('price elasticity of demand', '<f8'),
-                ('model', '|O4'),
-                ('policy', '|O4')]
-    
     path = os.path.dirname(__file__)
-    fn = './data/scarcity.zip'
+    fn = './data/1000 runs scarcity.tar.gz'
     fn = os.path.join(path, fn)
-    outcomes = {}
 
-    ooi_map = {'relative market price': 'relative market price.csv',
-               TIME: "time.csv"}
-
-    with zipfile.ZipFile(fn) as z:
-        experiments = StringIO.StringIO(z.read('experiments.csv'))
-        experiments = csv2rec(experiments)
-        dt = np.dtype(dt_descr)
-
-        for i, entry in enumerate(experiments.dtype.descr):
-            experiments[entry[0]] = experiments[entry[0]].astype(dt[i])
-
-        for key, value in ooi_map.iteritems():
-            data = StringIO.StringIO(z.read(value))
-            outcomes[key] = np.loadtxt(data, delimiter=',')   
-
-    
-#     dt = np.dtype(dt_descr)
-#     experiments = experiments.astype(dt)
-#   
-#     fn = './data/scarcity/relative_market_price.csv'
-#     fn = os.path.join(path, fn)    
-#     outcomes['relative market price'] = np.loadtxt(fn, delimiter=',')
-#     
-#     fn = './data/scarcity/time.csv'
-#     fn = os.path.join(path, fn)
-#     outcomes[TIME] = np.loadtxt(fn, delimiter=',')
+    experiments, outcomes = load_results(fn)
+    return experiments, outcomes
     
     return experiments, outcomes
+
 
 def load_eng_trans_data():
 
@@ -170,20 +99,20 @@ def load_eng_trans_data():
     outcomes = {}
 
     with zipfile.ZipFile(fn) as z:
-        experiments = StringIO.StringIO(z.read('experiments.csv'))
+        experiments = io.StringIO(z.read('experiments.csv').decode('UTF-8'))
         experiments = csv2rec(experiments)
         dt = np.dtype(dt_descr)
         names = [entry[0] for entry in dt_descr]
         experiments.dtype.names = names
         experiments = experiments.astype(dt)
        
-        data = StringIO.StringIO(z.read('total capacity installed.csv'))
+        data = io.StringIO(z.read('total capacity installed.csv').decode('UTF-8'))
         outcomes['total capacity installed'] = np.loadtxt(data, delimiter=',')
          
-        data = StringIO.StringIO(z.read('TIME.csv'))
+        data = io.StringIO(z.read('TIME.csv').decode('UTF-8'))
         outcomes[TIME] = np.loadtxt(data, delimiter=',')
       
-        data = StringIO.StringIO(z.read('total fraction new technologies.csv'))
+        data = io.StringIO(z.read('total fraction new technologies.csv').decode('UTF-8'))
         outcomes['total fraction new technologies'] = np.loadtxt(data, 
                                                                  delimiter=',')
     

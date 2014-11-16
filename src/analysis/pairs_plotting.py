@@ -13,8 +13,8 @@ import matplotlib.cm as cm
 
 from expWorkbench.ema_logging import debug, info
 
-from plotting_util import prepare_pairs_data, make_legend, COLOR_LIST
-from analysis.plotting_util import SCATTER, LINE
+from .plotting_util import prepare_pairs_data, make_legend, COLOR_LIST,\
+                           SCATTER, LINE
 
 __all__ = ['pairs_scatter', 'pairs_lines', 'pairs_density']
 

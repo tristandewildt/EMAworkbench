@@ -7,13 +7,14 @@ Created on Jul 9, 2014
 TODO:: look at http://scikit-learn.org/stable/auto_examples/linear_model/plot_sparse_recovery.html#example-linear-model-plot-sparse-recovery-py
 
 '''
-from types import StringType
+
 
 import numpy as np
 import numpy.lib.recfunctions as recfunctions
 
-from sklearn.ensemble import RandomForestClassifier
 from operator import itemgetter
+
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble.forest import RandomForestRegressor
 from sklearn.feature_selection.univariate_selection import f_regression,\
     f_classif, chi2
@@ -61,7 +62,7 @@ def _prepare_outcomes(outcomes, classify):
              KeyError if the string is not a key in the outcomes dict.
     
     '''
-    if type(classify)==StringType:
+    if type(classify)==bytes:
         try:
             y = outcomes[classify]
         except KeyError as e:

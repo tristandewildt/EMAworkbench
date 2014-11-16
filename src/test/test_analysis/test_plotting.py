@@ -26,8 +26,8 @@ def test_make_continuous_grouping_specifiers():
     categories = make_continuous_grouping_specifiers(array, nr_of_groups=10)
     
     for entry in categories:
-        print repr(entry)
-    print np.min(array), np.max(array)
+        print(repr(entry))
+    print("{}, {}".format(np.min(array), np.max(array)))
 
 def test_filter_scalar_outcomes():
     outcomes = {}
@@ -36,10 +36,10 @@ def test_filter_scalar_outcomes():
     for entry in ['d','e','f']:
         outcomes[entry] = np.random.rand(10)
     outcomes = filter_scalar_outcomes(outcomes)
-    print outcomes.keys()
+    print(outcomes.keys())
 
 def test_group_results():
-    results = load_results(r'./../data/eng_trans_100.cPickle', zipped=False)
+    results = util.load_eng_trans_data()
     experiments, outcomes = results
     
     # test indices
@@ -52,7 +52,7 @@ def test_group_results():
     total_data = 0
     for value in groups.values():
         total_data += value[0].shape[0]
-    print experiments.shape[0], total_data
+    print("{}, {}".format(experiments.shape[0], total_data))
     
     # test continuous parameter type
     array = experiments['average planning and construction period T1']
@@ -63,7 +63,7 @@ def test_group_results():
     total_data = 0
     for value in groups.values():
         total_data += value[0].shape[0]
-    print experiments.shape[0], total_data   
+    print("{}, {}".format(experiments.shape[0], total_data))
     
     # test integer type
     array = experiments['seed PR T1']
@@ -74,8 +74,7 @@ def test_group_results():
     total_data = 0
     for value in groups.values():
         total_data += value[0].shape[0]
-    print experiments.shape[0], total_data   
-
+    print("{}, {}".format(experiments.shape[0], total_data))
     
     # test categorical type
     grouping_specifiers = set(experiments["policy"])
@@ -85,7 +84,7 @@ def test_group_results():
     total_data = 0
     for value in groups.values():
         total_data += value[0].shape[0]
-    print experiments.shape[0], total_data   
+    print("{}, {}".format(experiments.shape[0], total_data))
 
 def test_lines():
     results = util.load_eng_trans_data()
@@ -334,11 +333,12 @@ def test_kde_over_time():
     
 #    kde_over_time(results, log=False)
 #    kde_over_time(results, log=True)
-    kde_over_time(results, group_by='policy', grouping_specifiers=['no policy', 'adaptive policy'])
+    kde_over_time(results, group_by='policy', 
+                   grouping_specifiers=['no policy', 'adaptive policy'])
     plt.show()
 
 def test_pairs_lines():
-    results = util.load_eng_trans_data()  
+    results = util.load_scarcity_data()  
     pairs_lines(results)
 #    set_fig_to_bw(pairs_lines(results)[0])
     
@@ -347,7 +347,7 @@ def test_pairs_lines():
     plt.show()
 
 def test_pairs_density():
-    results =  util.load_eng_trans_data() 
+    results =  util.load_eng_trans_data()
 #    pairs_density(results)
 #    pairs_density(results, colormap='binary')
 
@@ -358,7 +358,7 @@ def test_pairs_scatter():
     results = util.load_eng_trans_data() 
     
     pairs_scatter(results)
-#    set_fig_to_bw(pairs_scatter(results)[0])
+    set_fig_to_bw(pairs_scatter(results)[0])
     
     pairs_scatter(results, group_by='policy',
                   grouping_specifiers='basic policy', legend=False)
@@ -468,8 +468,8 @@ if __name__ == '__main__':
 #     test_kde_over_time()
 #     test_multiple_densities()
 
-#     test_pairs_scatter()
-    test_pairs_lines()
+    test_pairs_scatter()
+#     test_pairs_lines()
 #    test_pairs_density()
 
 #    test_filter_scalar_outcomes()

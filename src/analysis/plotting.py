@@ -11,7 +11,7 @@ rely on `matplotlib <http://matplotlib.sourceforge.net/>`_,
 """
 from __future__ import division
 import copy
-from types import StringType
+
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,7 +19,7 @@ from matplotlib.patches import ConnectionPatch
 
 from expWorkbench.ema_logging import debug, warning
 from expWorkbench.ema_exceptions import EMAError
-from plotting_util import prepare_data, COLOR_LIST, simple_kde, group_density,\
+from .plotting_util import prepare_data, COLOR_LIST, simple_kde, group_density,\
                          make_grid, make_legend, plot_envelope, simple_density,\
                          do_titles,do_ylabels, TIME, ENV_LIN, ENVELOPE, LINES,\
                          PATCH, LINE, TIGHT, KDE
@@ -584,8 +584,8 @@ def kde_over_time(results,
         figures = []
         axes_dicts = {}
         for key, value in outcomes.items():
-            fig, axes_dict = simple_kde(value, outcomes_to_show, colormap, log, minima, 
-                                        maxima)
+            fig, axes_dict = simple_kde(value, outcomes_to_show, colormap, log,
+                                        minima, maxima)
             fig.suptitle(key)
             figures.append(fig)
             axes_dicts[key] = axes_dict
@@ -671,7 +671,7 @@ def multiple_densities(results,
     if not outcomes_to_show:
         outcomes_to_show =  results[1].keys()
         outcomes_to_show.remove(TIME)
-    elif type(outcomes_to_show)==StringType:
+    elif type(outcomes_to_show)==str:
         outcomes_to_show=[outcomes_to_show]
     
     axes_dicts = {}

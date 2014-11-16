@@ -8,7 +8,7 @@ from collections import defaultdict
 import numpy.lib.recfunctions as recfunctions
 # from deap.tools import isDominated
 import copy
-import ema_logging
+from . import ema_logging
 from expWorkbench.ema_exceptions import EMAError
 
 __all__ = ["mut_polynomial_bounded",

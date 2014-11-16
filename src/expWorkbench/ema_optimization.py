@@ -12,14 +12,14 @@ import numpy as np
 import random 
 import copy
 
-from deap.tools import HallOfFame
-from ema_optimization_util import compare, mut_polynomial_bounded,\
-                                  mut_uniform_int,\
-                                  select_tournament_dominance_crowding
 from deap import base
 from deap import creator
 from deap import tools
+from deap.tools import HallOfFame
 
+from .ema_optimization_util import compare, mut_polynomial_bounded,\
+                                  mut_uniform_int,\
+                                  select_tournament_dominance_crowding
 from expWorkbench import ema_logging
 from expWorkbench import debug
 

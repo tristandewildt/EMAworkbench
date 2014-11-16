@@ -94,9 +94,10 @@ def command(command):
     execute a command, for details see chapter 5.
     '''
     
+    command = command.encode('utf-8')
     return_val = vensim.vensim_command(command)
     if return_val == 0:
-        raise VensimWarning("command failed "+command)
+        raise VensimWarning("command failed {}".format(command))
     return return_val
 
 def continue_simulation(num_inter):
@@ -123,7 +124,7 @@ def finish_simulation():
         raise VensimWarning("failure to finish simulation")
     return return_val
     
-def get_data(filename, varname, tname = "Time"):
+def get_data(filename, varname, tname=b"Time"):
     ''' 
     Retrieves data from simulation runs or imported data sets. In contrast
     to the Vensim DLL, this method retrieves all the data, and not only the 
@@ -140,26 +141,29 @@ def get_data(filename, varname, tname = "Time"):
     tval = (ctypes.c_float * 1)()  
     maxn = ctypes.c_int(0)
     
+    filename = filename.encode('utf-8')
+    varname = varname.encode('utf-8')
+    
     return_val = vensim.vensim_get_data(filename, 
-                                         varname, 
-                                         tname, 
-                                         vval, 
-                                         tval, 
-                                         maxn)
+                                        varname, 
+                                        tname, 
+                                        vval, 
+                                        tval, 
+                                        maxn)
     
     if return_val == 0:
-        raise VensimWarning("variable "+varname+" not found in dataset")
+        raise VensimWarning("variable {} not found in dataset".format(varname))
     
     vval = (ctypes.c_float * int(return_val))()  
     tval = (ctypes.c_float * int(return_val))()  
     maxn = ctypes.c_int(int(return_val))
     
     return_val = vensim.vensim_get_data(filename,\
-                                         varname,\
-                                         tname,\
-                                         vval,\
-                                         tval,\
-                                         maxn)
+                                        varname,\
+                                        tname,\
+                                        vval,\
+                                        tval,\
+                                        maxn)
 
     vval = np.ctypeslib.as_array(vval)
     tval = np.ctypeslib.as_array(tval)
@@ -238,6 +242,8 @@ def get_val(name):
     
     '''
     value = ctypes.c_float(0)
+    name = name.encode('UTF-8')
+    
     return_val = vensim.vensim_get_val(name, ctypes.byref(value))
     if return_val == 0:
         raise VensimWarning("variable not found")
@@ -269,8 +275,9 @@ def get_varattrib(varname, attribute):
     15 for the main group of a variable
     
     ''' 
-    buf = ctypes.create_string_buffer("", 10)
+    buf = ctypes.create_string_buffer(b"", 10)
     maxBuf = ctypes.c_int(10)
+    varname = varname.encode('utf-8')
     
     bufferlength = vensim.vensim_get_varattrib(varname, 
                                                attribute, 
@@ -279,7 +286,7 @@ def get_varattrib(varname, attribute):
     if bufferlength == -1:
         raise VensimWarning("variable not found")
     
-    buf = ctypes.create_string_buffer("", int(bufferlength))
+    buf = ctypes.create_string_buffer(b"", int(bufferlength))
     maxBuf = ctypes.c_int(int(bufferlength))       
     vensim.vensim_get_varattrib(varname, attribute, buf, maxBuf)
     
@@ -292,13 +299,13 @@ def get_varattrib(varname, attribute):
     
     return result
 
-def get_varnames(filter = '*', vartype = 0):
+def get_varnames(filter = b'*', vartype = 0):
     '''
     This function returns variable names in the model a filter can be 
     specified in the same way as Vensim variable Selection filter 
     (use * for all), vartype is an integer that specifies the types of 
     variables you want to see. 
-    (see DSS reference chapter 12 for details) 
+(see DSS reference chapter 12 for details) 
     
     :param filter: selection filter, use \* for all. 
     :param vartype: variable type to retrieve. See table
@@ -326,19 +333,17 @@ def get_varnames(filter = '*', vartype = 0):
     
     filter = ctypes.c_char_p(filter)
     vartype = ctypes.c_int(vartype)
-    buf = ctypes.create_string_buffer("", 512)
+    buf = ctypes.create_string_buffer(b"", 512)
     maxBuf = ctypes.c_int(512)    
 
     a = vensim.vensim_get_varnames(filter, vartype, buf, maxBuf)
-    buf = ctypes.create_string_buffer("", int(a))
+    buf = ctypes.create_string_buffer(b"", int(a))
     maxBuf = ctypes.c_int(int(a))
     vensim.vensim_get_varnames(filter, vartype, buf, maxBuf)
     
-    varnames = repr(buf.raw)
+    varnames = buf.raw.decode('UTF-8')
     varnames = varnames.strip()
-    varnames = varnames.rstrip("'")
-    varnames = varnames.lstrip("'")
-    varnames = varnames.split(r"\x00")
+    varnames = varnames.split("\x00")
     varnames = [varname for varname in varnames if len(varname) != 0]
 
     return varnames

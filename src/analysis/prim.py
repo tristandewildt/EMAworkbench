@@ -5,7 +5,7 @@ Created on 22 feb. 2013
 
 '''
 from __future__ import division, print_function
-from types import StringType, FloatType, IntType
+
 from operator import itemgetter
 import copy
 import math
@@ -211,7 +211,7 @@ def _in_box(x, boxlim):
             entries = boxlim[name][0]
             l = np.ones( (x.shape[0], len(entries)), dtype=np.bool)
             for i,entry in enumerate(entries):
-                if type(list(entries)[0]) not in (StringType, FloatType, IntType):
+                if type(list(entries)[0]) not in (bytes, float, int):
                     bools = []                
                     for element in list(x[name]):
                         if element == entry:
@@ -300,7 +300,7 @@ class PrimBox(object):
         stats['restricted_dim'] = stats['res dim']
 
         qp_values = self._calculate_quasi_p(i)
-        uncs = [(key, value) for key, value in qp_values.iteritems()]
+        uncs = [(key, value) for key, value in qp_values.items()]
         uncs.sort(key=itemgetter(1))
         uncs = [uncs[0] for uncs in uncs]
         
@@ -596,7 +596,7 @@ class Prim(object):
         else:
             drop_names = set(recfunctions.get_names(results[0].dtype))-set(incl_unc)
             self.x = recfunctions.drop_fields(results[0], drop_names, asrecarray = True)
-        if type(classify)==StringType:
+        if type(classify)==str:
             self.y = results[1][classify]
         elif callable(classify):
             self.y = classify(results[1])
@@ -862,7 +862,9 @@ class Prim(object):
             
             if dtype == 'object':
                 try:
-                    values = set(values) - set([np.ma.masked])
+                    if type(values)==np.ma.MaskedArray:
+                        values = values.compressed()
+                    values = set(values) 
                     box[name][:] = values
                 except TypeError as e:
                     ema_logging.warning("{} has unhashable values".format(name))
@@ -1232,7 +1234,7 @@ class Prim(object):
                 peel.discard(entry)
                 temp_box[u][:] = peel
                 
-                if type(list(entries)[0]) not in (StringType, FloatType, IntType):
+                if type(list(entries)[0]) not in (bytes, float, int):
                     bools = []                
                     for element in list(x[u]):
                         if element != entry:
