@@ -671,7 +671,7 @@ class Prim(object):
                         **note:** the list of uncertainties should not 
                         contain categorical uncertainties. 
         :param exclude: optional kwarg, the uncertainties that should be 
-                        excluded. TODO: from what?
+                        excluded from the PCA.
         
         '''
         
