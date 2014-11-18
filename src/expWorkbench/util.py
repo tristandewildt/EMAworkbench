@@ -126,7 +126,9 @@ def save_results(results, file_name):
         tarinfo = tarfile.TarInfo(filename)
         tarinfo.size = len(string_to_add)
         
-        z.addfile(tarinfo, io.StringIO(string_to_add))  
+        stringIO = io.BytesIO(string_to_add.encode('UTF-8'))
+        
+        z.addfile(tarinfo, stringIO)
     
     def save_numpy_array(fh, data):
         data = pd.DataFrame(data)
@@ -137,7 +139,7 @@ def save_results(results, file_name):
         # write the experiments to the zipfile
         experiments_file = io.StringIO()
         rec2csv(experiments, experiments_file, withheader=True)
-        add_file(z, experiments_file.getvalue(), 'experiments.csv')
+        add_file(z, experiments_file.getvalue(),'experiments.csv')
         
         # write experiment metadata
         dtype = experiments.dtype.descr
@@ -154,7 +156,7 @@ def save_results(results, file_name):
         
         
         # outcomes
-        for key, value in outcomes.iteritems():
+        for key, value in outcomes.items():
             fh = io.StringIO()
             
             nr_dim = len(value.shape)

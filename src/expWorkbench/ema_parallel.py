@@ -27,7 +27,6 @@ import copy
 import os
 import time
 import queue
-import multiprocessing
 import random
 import string
 
@@ -86,7 +85,7 @@ def worker(inqueue,
         
         # check whether we already initialized the model for this 
         # policy
-        if not msi_initialization_dict.has_key((policy['name'], msi)):
+        if (policy['name'], msi) not in msi_initialization_dict:
             try:
                 debug("invoking model init")
                 msis[msi].model_init(copy.deepcopy(policy), 
@@ -144,6 +143,12 @@ class CalculatorPool(Pool):
         :param kwargs: kwargs to be pased to :meth:`model_init`
         '''
         
+        self._setup_queues()
+        self._taskqueue = queue.Queue(cpu_count()*2)
+        self._cache = {}
+        self._state = RUN
+
+
         if processes is None:
             try:
                 processes = cpu_count()
@@ -153,12 +158,12 @@ class CalculatorPool(Pool):
     
         # setup queues etc.
         self._setup_queues()
-        self._taskqueue = Queue.Queue(processes*2)
+        self._taskqueue = queue.Queue(processes*2)
         self._cache = {}
         self._state = RUN
         
         # handling of logging
-        self.log_queue = multiprocessing.Queue()
+        self.log_queue = queue.Queue()
         h = NullHandler()
         logging.getLogger(ema_logging.LOGGER_NAME).addHandler(h)
         
@@ -181,15 +186,12 @@ class CalculatorPool(Pool):
             for msi in msis:
                 if msi.working_directory != None:
                     if worker_root == None:
+
                         wd = msis[0].working_directory
                         abs_wd = os.path.abspath(wd)
                         worker_root = os.path.dirname(abs_wd)
                     
                     working_directory = os.path.join(worker_root, workername)
-                    
-#                     working_directory = tempfile.mkdtemp(suffix=workername,
-#                                                          prefix='tmp_',
-#                                                          dir=worker_root)
                     
                     working_dirs.append(working_directory)
                     shutil.copytree(msi.working_directory, 
@@ -476,7 +478,7 @@ class EMAApplyResult(object):
 
     def __init__(self, cache, callback, event):
         self._cond = threading.Condition(threading.Lock())
-        self._job = job_counter.next()
+        self._job = next(job_counter)
         self._cache = cache
         self._ready = False
         self._callback = callback

@@ -222,7 +222,7 @@ def _in_box(x, boxlim):
             entries = boxlim[name][0]
             l = np.ones( (x.shape[0], len(entries)), dtype=np.bool)
             for i,entry in enumerate(entries):
-                if type(list(entries)[0]) not in (bytes, float, int):
+                if type(list(entries)[0]) not in (str, float, int):
                     bools = []                
                     for element in list(x[name]):
                         if element == entry:
@@ -1240,7 +1240,7 @@ class Prim(object):
                 peel.discard(entry)
                 temp_box[u][:] = peel
                 
-                if type(list(entries)[0]) not in (bytes, float, int):
+                if type(list(entries)[0]) not in (str, float, int):
                     bools = []                
                     for element in list(x[u]):
                         if element != entry:
