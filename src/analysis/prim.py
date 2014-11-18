@@ -12,7 +12,7 @@ import math
 
 import numpy as np
 import numpy.lib.recfunctions as recfunctions
-from scipy.stats import binom
+from scipy.stats import binom, ttest_ind
 
 from mpl_toolkits.axes_grid1 import host_subplot  # @UnresolvedImport
 import matplotlib.pyplot as plt
@@ -30,7 +30,9 @@ ORIGINAL = 'original'
 
 ABOVE = 1
 BELOW = -1
-PRECISION = '.2f'
+
+REGRESSION = 'regression'
+CLASSIFICATION = 'classification'
 
 def get_quantile(data, quantile):
     '''
@@ -69,41 +71,6 @@ def get_quantile(data, quantile):
 
     return value
 
-def _determine_size(box, uncertainties):
-    '''helper function for determining spacing when writing boxlims to stdout
-    
-    :param box: a box definition, used only to acquire datatype
-    :param uncertainties: a list of uncertainties to be printed
-    
-    fill the limits in for each uncertainty and each box
-    determine the length of the uncertainty names to align these properly
-    determine size of values in box_lims, this should be based on the integers 
-    and floats only
-    
-    '''
-    
-    length = max([len(u) for u in uncertainties])
-    length = max((length, len('uncertainty')))
-    
-    size = 0
-    for u in uncertainties:
-        data_type =  box[u].dtype
-        if data_type == np.float64:
-            size = max(size, 
-                       len("{:>{}}".format(box[u][0], PRECISION)), 
-                       len("{:>{}}".format(box[u][1], PRECISION)))
-        elif data_type == np.int32:
-            size = max(size, 
-                       len("{:>}".format(box[u][0])), 
-                       len("{:>}".format(box[u][1])))   
-        elif data_type == np.object:
-            s = len("{}".format(box[u][0]))
-            s = int(s/2)-4
-            size = max(size,
-                       s)
-    size = size+4
-    return length, size
-
 
 def _setup_figure(uncs):
     '''
@@ -128,6 +95,7 @@ def _setup_figure(uncs):
     ax.xaxis.set_ticks([0, 0.25, 0.5, 0.75, 1])
     ax.set_yticklabels(uncs[::-1]) 
     return fig, ax
+
 
 def _pair_wise_scatter(x,y, box_lim, restricted_dims):
     ''' helper function for pair wise scatter plotting
@@ -192,7 +160,8 @@ def _pair_wise_scatter(x,y, box_lim, restricted_dims):
         pairs_plotting.do_text_ticks_labels(ax, i, j, field1, field2, None, restricted_dims)
             
     return figure
-        
+
+
 def _in_box(x, boxlim):
     '''
      
@@ -321,58 +290,7 @@ class PrimBox(object):
         
         print(box_lim)
         print()
-        
-#         print self._format_stats(i, stats)   
-#         print ""
-#                 
-#         qp_values = self._calculate_quasi_p(i)
-#         uncs = [(key, value) for key, value in qp_values.iteritems()]
-#         uncs.sort(key=itemgetter(1))
-#         uncs = [uncs[0] for uncs in uncs]
-# 
-#         qp_col_size = len("qp values")+4
-#         box = self.box_lims[i]
-#         unc_col_size, value_col_size = _determine_size(box, uncs)
-#         
-#         # make the headers of the limits table
-#         # first header is box names
-#         # second header is min and max
-#         elements_1 = ["{0:<{1}}".format("uncertainty", unc_col_size)]
-#         elements_2 = ["{0:<{1}}".format("", unc_col_size)]
-#         box_name = 'box {}'.format(i)
-#         elements_1.append("{0:>{2}}{1:>{3}}".format("{}".format(box_name),"", value_col_size+4, value_col_size-2))
-#         elements_2.append("{0:>{3}}{1:>{4}}{2:>{5}}".format("min", "max","qp values", value_col_size, value_col_size+2, qp_col_size))
-#         line = "".join(elements_1)
-#         print line
-#         line = "".join(elements_2)
-#         print line
-#         
-#         for u in uncs:
-#             elements = ["{0:<{1}}".format(u, unc_col_size)]
-# 
-#             data_type =  box[u].dtype
-#             if data_type == np.float64:
-#                 data = list(box[u])
-#                 data.append(value_col_size)
-#                 data.append(value_col_size)
-#                 data.append(PRECISION)
-#                 
-#                 elements.append("{0:>{2}{4}} -{1:>{3}{4}}".format(*data))
-#             elif data_type == np.int32:
-#                 data = list(box[u])
-#                 data.append(value_col_size)
-#                 data.append(value_col_size)                
-#                 
-#                 elements.append("{0:>{2}} -{1:>{3}}".format(*data))            
-#             else:
-#                 elements.append("{0:>{1}}".format(box[u][0], value_col_size*2+2))
-#             
-#             elements.append("{0:>{1}{2}}".format(qp_values[u], qp_col_size, '.2e'))
-#             
-#             line = "".join(elements)
-#             print line
-#         print "\n"        
-        
+
     def select(self, i):
         '''        
         select an entry from the peeling and pasting trajectory and update
@@ -433,39 +351,75 @@ class PrimBox(object):
         self.peeling_trajectory = self.peeling_trajectory.append(new_row, ignore_index=True)
         
         self._cur_box = len(self.peeling_trajectory)-1
-        
-        
+
     def show_ppt(self):
         '''show the peeling and pasting trajectory in a figure'''
         
         ax = host_subplot(111)
         ax.set_xlabel("peeling and pasting trajectory")
         
-        par = ax.twinx()
-        par.set_ylabel("nr. restricted dimensions")
+        if self.prim.mode==CLASSIFICATION:
+            par = ax.twinx()
+            par.set_ylabel("nr. restricted dimensions")
+
+
+            ax.plot(self.peeling_trajectory['coverage'], label="coverage")
+            ax.plot(self.peeling_trajectory['density'], label="density")
+            ax.plot(self.peeling_trajectory['mass'], label="mass")
+
+            par.plot(self.peeling_trajectory['res dim'], label="restricted dims")
+            ax.grid(True, which='both')
+
+        
+            ax.set_ylim(ymin=0,ymax=1)
+
+        
+            fig = plt.gcf()
+            make_legend(['coverage', 'density', 'mass', 'restricted_dim'],
+                        ax, ncol=5, alpha=1)
+        else:
+            par1 = ax.twinx()
+            par1.set_ylabel("mass")
             
-        ax.plot(self.peeling_trajectory['mean'], label="mean")
-        ax.plot(self.peeling_trajectory['mass'], label="mass")
-        ax.plot(self.peeling_trajectory['coverage'], label="coverage")
-        ax.plot(self.peeling_trajectory['density'], label="density")
-        par.plot(self.peeling_trajectory['res dim'], label="restricted dims")
-        ax.grid(True, which='both')
-        ax.set_ylim(ymin=0,ymax=1)
-        
-        fig = plt.gcf()
-        
-        make_legend(['mean', 'mass', 'coverage', 'density', 'restricted_dim'],
-                    ax, ncol=5, alpha=1)
+            par2 = ax.twinx()
+            par2.set_ylabel("nr. restricted dimensions")
+            
+            ax.plot(self.peeling_trajectory['mean'], label="mean")
+            par1.plot(self.peeling_trajectory['mass'], label="mass")
+            par2.plot(self.peeling_trajectory['res dim'], label="restricted dims")
+            
+            ax.grid(True, which='both')
+            
+            # Offset the right spine of par2.  The ticks and label have already been
+            # placed on the right by twinx above.
+            par2.spines["right"].set_position(("axes", 1.2))
+            # Having been created by twinx, par2 has its frame off, so the line of its
+            # detached spine is invisible.  First, activate the frame but make the patch
+            # and spines invisible.
+            par2.set_frame_on(True)
+            par2.patch.set_visible(False)
+            for sp in par2.spines.values():
+                sp.set_visible(False)
+            
+            # Second, show the right spine.
+            par2.spines["right"].set_visible(True)            
+                        
+            fig = plt.gcf()
+            make_legend(['mean', 'mass', 'restricted_dim'],
+                        ax, ncol=5, alpha=1)
+            
         return fig
     
     def show_tradeoff(self):
         '''Visualise the trade off between coverage and density. Color is used
         to denote the number of restricted dimensions.'''
        
+        assert(self.prim.mode==CLASSIFICATION)
+        
         fig = plt.figure()
         ax = fig.add_subplot(111)
         
-        cmap = mpl.cm.jet #@UndefinedVariable
+        cmap = mpl.cm.hot #@UndefinedVariable
         boundaries = np.arange(-0.5, 
                                max(self.peeling_trajectory['res dim'])+1.5, 
                                step=1)
@@ -474,7 +428,8 @@ class PrimBox(object):
         
         p = ax.scatter(self.peeling_trajectory['coverage'], 
                        self.peeling_trajectory['density'], 
-                       c=self.peeling_trajectory['res dim'], norm=norm)
+                       c=self.peeling_trajectory['res dim'], norm=norm,
+					   cmap=cmap)
         ax.set_ylabel('density')
         ax.set_xlabel('coverage')
         ax.set_ylim(ymin=0, ymax=1.2)
@@ -504,18 +459,41 @@ class PrimBox(object):
         print("\n")
 
     def _calculate_quasi_p(self, i):
-        '''helper function for calculating quasi-p values as discussed in 
-        Bryant and Lempert (2010). This is in essence a one sided 
-        binominal test. 
+        '''helper function for calculating quasi-p values. In case of 
+        regression mode, it use Welsch t-test. In case of classification mode
+        it uses a one sided binominal test as discussed in Bryant and Lempert
+        (2010).
+
+
         
         :param i: the specific box in the peeling trajectory for which the 
                   quasi-p values are to be calculated
+        
+        TODO::
+        * test removal of upper and lower limit separately if both are restricted
         
         '''
         
         box_lim = self.box_lims[i]
         restricted_dims = list(self.prim.determine_restricted_dims(box_lim))
         
+        if self.prim.mode==CLASSIFICATION:
+            return self._quasi_p_classification(restricted_dims, box_lim, i)
+        else:
+            return self._quasi_p_regression(restricted_dims, box_lim, i)
+
+    def _quasi_p_classification(self, restricted_dims, box_lim, i):
+        '''Helper function for calculating quasi-p values as discussed in 
+        Bryant and Lempert (2010). This is in essence a one sided 
+        binominal test.
+        
+        :param restricted_dims: the dimensions restricted by box_lim
+        :param box_lim: the box limits for which to calculate the qp values
+        :param i: the specific box in the peeling trajectory for which the 
+                  quasi-p values are to be calculated
+        
+        '''
+
         # total nr. of cases in box
         Tbox = self.peeling_trajectory['mass'][i] * self.prim.n 
         
@@ -529,7 +507,7 @@ class PrimBox(object):
             temp_box[u] = self.box_lims[0][u]
         
             indices = _in_box(self.prim.x[self.prim.yi_remaining], temp_box)
-            indices = self.prim.yi_remaining[indices]
+
             
             # total nr. of cases in box with one restriction removed
             Tj = indices.shape[0]  
@@ -546,6 +524,37 @@ class PrimBox(object):
             qp = binom.sf(Hbox-1, Tbox, p)
             qp_values[u] = qp
             
+        return qp_values
+    
+    def _quasi_p_regression(self, restricted_dims, box_lim, i):
+        '''Helper function for calculating quasi-p values in regression mode.
+        For this we use Welch's t-test.
+        
+        :param restricted_dims: the dimensions restricted by box_lim
+        :param box_lim: the box limits for which to calculate the qp values
+        :param i: the specific box in the peeling trajectory for which the 
+                  quasi-p values are to be calculated
+        
+        '''
+        # indices on yi remaining
+        original_indices = _in_box(self.prim.x[self.prim.yi_remaining], 
+                                   box_lim)
+        
+        # original data
+        original_data = self.prim.y[original_indices]
+        
+        qp_values = {}
+        for u in restricted_dims:
+            temp_box = copy.deepcopy(box_lim)
+            temp_box[u] = self.box_lims[0][u]
+        
+            alternative_indices = _in_box(self.prim.x[self.prim.yi_remaining], 
+                                          temp_box)
+            alternative_data = self.prim.y[alternative_indices]
+            
+            #scipy.stats.ttest_ind
+            qp = ttest_ind(original_data, alternative_data, equal_var=False)
+            qp_values[u] = qp[1]
         return qp_values
 
     def _format_stats(self, nr, stats):
@@ -596,10 +605,13 @@ class Prim(object):
         else:
             drop_names = set(recfunctions.get_names(results[0].dtype))-set(incl_unc)
             self.x = recfunctions.drop_fields(results[0], drop_names, asrecarray = True)
+        
         if type(classify)==str:
             self.y = results[1][classify]
+            self.mode = REGRESSION
         elif callable(classify):
             self.y = classify(results[1])
+            self.mode = CLASSIFICATION
         else:
             raise TypeError("unknown type for classify")
         
@@ -656,6 +668,7 @@ class Prim(object):
         
         #get experiments of interest
         # TODO this assumes binary classification!!!!!!!
+        assert(self.mode==CLASSIFICATION)
         logical = self.y>=self.threshold
         
         # if no subsets are provided all uncertainties with non dtype object are
@@ -1507,11 +1520,13 @@ class Prim(object):
         return eigen_vectors
 
     _peels = {'object': _categorical_peel,
-               'int32': _discrete_peel,
-               'float64': _real_peel}
+              'int32': _discrete_peel,
+			  'int36': _discrete_peel,
+              'float64': _real_peel}
 
     _pastes = {'object': _categorical_paste,
                'int32': _real_paste,
+			   'int32': _real_paste,
                'float64': _real_paste}
 
     # dict with the various objective functions available
