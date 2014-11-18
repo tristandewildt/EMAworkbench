@@ -75,5 +75,5 @@ if __name__ == "__main__":
     nr_experiments = 1000
     results = ensemble.perform_experiments(nr_experiments)
     
-    fh =  r'./data/{} flu cases no policy.tar.gz'.format(nr_experiments)
-    save_results(results, fh)
+#     fh =  r'./data/{} flu cases no policy.tar.gz'.format(nr_experiments)
+#     save_results(results, fh)

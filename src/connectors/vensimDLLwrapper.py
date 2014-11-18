@@ -40,7 +40,6 @@ class VensimError(EMAError):
     pass
 
 
-
 try:
     vensim_single = ctypes.windll.vendll32
 except (WindowsError, AttributeError):
@@ -65,6 +64,7 @@ else:
     sys.stderr.write(message+"\n")
     warning(message)
 del sys
+
 
 def be_quiet(quietflag):
     '''
