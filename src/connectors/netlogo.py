@@ -10,7 +10,7 @@ import numpy as np
 
 from expWorkbench import ModelStructureInterface, warning, debug,\
                          EMAError
-import pyNetLogo
+from . import pyNetLogo
 
 class NetLogoModelStructureInterface(ModelStructureInterface):
     model_file = None
@@ -72,7 +72,7 @@ class NetLogoModelStructureInterface(ModelStructureInterface):
         .. note:: This method should always be implemented.
         
         """
-        for key, value in case.iteritems():
+        for key, value in case.items():
             try:
                 self.netlogo.command(self.command_format.format(key, value))
             except jpype.JavaException as e:
@@ -163,7 +163,7 @@ class NetLogoModelStructureInterface(ModelStructureInterface):
 
     def _handle_outcomes(self, fns):
       
-        for key, value in fns.iteritems():
+        for key, value in fns.items():
             with open(value) as fh:
                 result = fh.readline()
                 result = result.strip()
