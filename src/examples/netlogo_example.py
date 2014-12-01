@@ -27,7 +27,7 @@ class PredatorPrey(NetLogoModelStructureInterface):
     
     outcomes = [Outcome('sheep', time=True),
                 Outcome('wolves', time=True),
-                Outcome('grass', time=True) # TODO patches not working in reporting
+                Outcome('grass', time=True) 
                 ]
     
 if __name__ == "__main__":
@@ -36,13 +36,13 @@ if __name__ == "__main__":
     
     #instantiate a model
     fh = r"./models/predatorPreyNetlogo"
-    vensimModel = PredatorPrey(fh, "simpleModel")
+    netlogo_model = PredatorPrey(fh, "simpleModel")
     
     #instantiate an ensemble
     ensemble = ModelEnsemble()
     
     #set the model on the ensemble
-    ensemble.set_model_structure(vensimModel)
+    ensemble.set_model_structure(netlogo_model)
     
     #run in parallel, if not set, FALSE is assumed
     ensemble.parallel = True
