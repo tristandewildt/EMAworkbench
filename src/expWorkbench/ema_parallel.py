@@ -26,13 +26,13 @@ import io
 import copy
 import os
 import time
-import queue
+
 
 import random
 import string
 
 from multiprocessing import Process, cpu_count, current_process,\
-                            TimeoutError
+                            TimeoutError, Queue
 from multiprocessing.util import Finalize
 
 from . import ema_logging
@@ -145,7 +145,7 @@ class CalculatorPool(Pool):
         '''
         
         self._setup_queues()
-        self._taskqueue = queue.Queue(cpu_count()*2)
+        self._taskqueue = Queue(cpu_count()*2)
         self._cache = {}
         self._state = RUN
 
@@ -156,15 +156,10 @@ class CalculatorPool(Pool):
             except NotImplementedError:
                 processes = 1
         info("nr of processes is "+str(processes))
-    
-        # setup queues etc.
-        self._setup_queues()
-        self._taskqueue = queue.Queue(processes*2)
-        self._cache = {}
-        self._state = RUN
+
         
         # handling of logging
-        self.log_queue = queue.Queue()
+        self.log_queue = Queue()
         h = NullHandler()
         logging.getLogger(ema_logging.LOGGER_NAME).addHandler(h)
         
