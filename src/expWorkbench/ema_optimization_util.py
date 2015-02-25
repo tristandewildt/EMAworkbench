@@ -9,7 +9,8 @@ import numpy as np
 import numpy.lib.recfunctions as recfunctions
 
 import copy
-from . import ema_logging
+
+
 from expWorkbench.ema_exceptions import EMAError
 from expWorkbench import debug
 from expWorkbench.callbacks import DefaultCallback
@@ -79,7 +80,7 @@ def select_tournament_dominance_crowding(individuals, k, nr_individuals):
         return best
         
     chosen = []
-    for _ in xrange(0, k):
+    for _ in range(0, k):
         tour_individuals = random.sample(individuals, nr_individuals)
         winner = tournament(tour_individuals)
         winner = copy.deepcopy(winner)
@@ -341,7 +342,7 @@ class MemmapCallback(DefaultCallback):
             try:
                 outcome_res = result[outcome]
             except KeyError:
-                ema_logging.debug("%s not in msi" % outcome)
+                debug("%s not in msi" % outcome)
             else:
                 try:
                     self.results[outcome][self.i-1, ] = outcome_res
