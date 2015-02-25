@@ -4,11 +4,10 @@ Created on Oct 12, 2013
 @author: jhkwakkel
 '''
 import random
-from collections import defaultdict
-import numpy.lib.recfunctions as recfunctions
-# from deap.tools import isDominated
 import copy
-from . import ema_logging
+
+import numpy.lib.recfunctions as recfunctions
+
 from expWorkbench.ema_exceptions import EMAError
 
 __all__ = ["mut_polynomial_bounded",
@@ -76,7 +75,7 @@ def select_tournament_dominance_crowding(individuals, k, nr_individuals):
         return best
         
     chosen = []
-    for i in xrange(0, k):
+    for _ in range(0, k):
         tour_individuals = random.sample(individuals, nr_individuals)
         winner = tournament(tour_individuals)
         winner = copy.deepcopy(winner)
@@ -302,7 +301,7 @@ def mut_uniform_int(individual, policy_levers, keys):
     :param indpb: Probability for each attribute to be mutated.
     :returns: A tuple of one individual.
     """
-    for i, entry in enumerate(policy_levers.iteritems()):
+    for _, entry in enumerate(policy_levers.iteritems()):
         if random.random() < 1/len(policy_levers.keys()):
             key, entry = entry
             values = entry['values']
