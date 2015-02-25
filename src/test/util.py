@@ -15,6 +15,7 @@ from expWorkbench.util import load_results
 
 def load_flu_data():
     path = os.path.dirname(__file__)
+
     fn = './data/1000 flu cases no policy.tar.gz'
     fn = os.path.join(path, fn)
 

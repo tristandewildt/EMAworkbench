@@ -27,6 +27,7 @@ import copy
 import os
 import time
 import queue
+
 import random
 import string
 
@@ -181,6 +182,7 @@ class CalculatorPool(Pool):
             debug('generating worker '+str(i))
             
             workername = self._get_worker_name(i)
+
             
             #setup working directories for parallel_ema
             for msi in msis:
@@ -191,8 +193,10 @@ class CalculatorPool(Pool):
                         abs_wd = os.path.abspath(wd)
                         worker_root = os.path.dirname(abs_wd)
                     
-                    working_directory = os.path.join(worker_root, workername)
+                    workername = 'tpm_{}_PoolWorker_{}'.format(workername, i)
                     
+                    working_directory = os.path.join(worker_root, workername)
+
                     working_dirs.append(working_directory)
                     shutil.copytree(msi.working_directory, 
                                     working_directory, 

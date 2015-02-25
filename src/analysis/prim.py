@@ -71,7 +71,6 @@ def get_quantile(data, quantile):
 
     return value
 
-
 def _compare(a, b):
     '''compare two boxes, for each dimension return True if the
     same and false otherwise'''
