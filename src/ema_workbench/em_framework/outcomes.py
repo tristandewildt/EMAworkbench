@@ -20,16 +20,6 @@ from .util import NamedObject
 __all__ = ['Outcome', 'ScalarOutcome', 'TimeSeriesOutcome']
 
 
-# TODO:: have two names for an outcome, one is the name as it is known
-# to the user, the other is the name of the variable in the model
-# the return value for the variable can be passed to a callable known
-# to the outcome. This makes is possible to have e.g. a peak infection, which
-# takes a time series on the infection, and finds the maximum over the time
-# series
-
-# TODO:: we need a output map, this map calls the outcomes to do
-# any transformation as outlined above
-
 def Outcome(name, time=False):
     if time:
         warnings.warn('Deprecated, use TimeSeriesOutcome instead')
