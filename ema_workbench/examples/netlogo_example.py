@@ -34,7 +34,7 @@ if __name__ == '__main__':
                       TimeSeriesOutcome('grass') ]
      
     #perform experiments
-    n = 10
+    n = 100
     
     with MultiprocessingEvaluator(model) as evaluator:
         results = perform_experiments(model, n, evaluator=evaluator)
