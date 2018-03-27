@@ -4,12 +4,15 @@ Created on 20 mrt. 2013
 @author: localadmin
 '''
 from __future__ import unicode_literals, absolute_import
+import matplotlib.pyplot as plt
 
 from ema_workbench.connectors.netlogo import NetLogoModel
 
 from ema_workbench import (RealParameter, ema_logging,
-                           perform_experiments,TimeSeriesOutcome)
+                           perform_experiments,TimeSeriesOutcome, save_results)
 from ema_workbench.em_framework.evaluators import MultiprocessingEvaluator
+from ema_workbench.analysis.plotting import lines
+from ema_workbench.analysis.plotting_util import BOXPLOT
 
 
 if __name__ == '__main__':
@@ -20,7 +23,7 @@ if __name__ == '__main__':
                           wd="./models/predatorPreyNetlogo", 
                           model_file="Wolf Sheep Predation.nlogo")
     model.run_length = 100
-    model.replications = 10
+    model.replications = 1
     
     model.uncertainties = [RealParameter("grass-regrowth-time", 1, 99),
                            RealParameter("initial-number-sheep", 1, 200),
@@ -31,10 +34,19 @@ if __name__ == '__main__':
     
     model.outcomes = [TimeSeriesOutcome('sheep'),
                       TimeSeriesOutcome('wolves'),
-                      TimeSeriesOutcome('grass') ]
+                      TimeSeriesOutcome('grass'),
+                      TimeSeriesOutcome('TIME') ]
      
     #perform experiments
     n = 10
     
     with MultiprocessingEvaluator(model) as evaluator:
         results = perform_experiments(model, n, evaluator=evaluator)
+        
+   
+    fn = r'./data/{} runs.tar.gz'.format(n)
+    save_results(results, fn)
+    
+    
+
+    print "finish"

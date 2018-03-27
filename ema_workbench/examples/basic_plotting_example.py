@@ -12,8 +12,10 @@ from ema_workbench.analysis.plotting_util import KDE
 
 ema_logging.log_to_stderr(ema_logging.INFO)
 
-file_name = r'./data/1000 flu cases.tar.gz'
+file_name = r'./data/10 runs.tar.gz'
+#file_name = r'./data/1000 flu cases no policy.tar.gz'
 results = load_results(file_name)
+
 
 # the plotting functions return the figure and a dict of axes
 fig, axes = envelopes(results, group_by='policy', density=KDE, fill=True)

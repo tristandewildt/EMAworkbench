@@ -1,4 +1,5 @@
-globals [grass]  ;; keep track of how much grass there is
+globals [grass
+TIME]  ;; keep track of how much grass there is
 ;; Sheep and wolves are both breeds of turtle.
 breed [sheep a-sheep]  ;; sheep is its own plural, so we use "a-sheep" as the singular.
 breed [wolves wolf]
@@ -36,10 +37,12 @@ to setup
   ]
   display-labels
   set grass count patches with [pcolor = green]
+  set TIME 0
   reset-ticks
 end
 
 to go
+  set TIME ticks
   if not any? turtles [ stop ]
   ask sheep [
     move
