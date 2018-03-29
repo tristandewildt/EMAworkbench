@@ -208,6 +208,7 @@ class NetLogoLink():
             netlogo_version = establish_netlogoversion(netlogo_home)
         if not jvm_home:
             jvm_home = jpype.get_default_jvm_path()  
+            print(jvm_home)
         
         
         if not jpype.isJVMStarted():
